@@ -55,13 +55,27 @@ PR_NUMBER           = os.environ.get("GITHUB_EVENT_PULL_REQUEST_NUMBER", "") or 
 
 # ── Colours ───────────────────────────────────────────────────────────────────
 
-RED   = "\033[0;31m"; YELLOW = "\033[1;33m"; GREEN  = "\033[0;32m"
-CYAN  = "\033[0;36m"; BOLD   = "\033[1m";    RESET  = "\033[0m"
+RED    = "\033[0;31m"
+YELLOW = "\033[1;33m"
+GREEN  = "\033[0;32m"
+CYAN   = "\033[0;36m"
+RESET  = "\033[0m"
 
-def log(msg: str)     -> None: print(f"{CYAN}[tf-action]{RESET} {msg}", flush=True)
-def ok(msg: str)      -> None: print(f"{GREEN}[tf-action] ✓{RESET} {msg}", flush=True)
-def warn(msg: str)    -> None: print(f"{YELLOW}[tf-action] ⚠{RESET} {msg}", flush=True)
-def err(msg: str)     -> None: print(f"{RED}[tf-action] ✗{RESET} {msg}", file=sys.stderr, flush=True)
+
+def log(msg: str) -> None:
+    print(f"{CYAN}[tf-action]{RESET} {msg}", flush=True)
+
+
+def ok(msg: str) -> None:
+    print(f"{GREEN}[tf-action] \u2713{RESET} {msg}", flush=True)
+
+
+def warn(msg: str) -> None:
+    print(f"{YELLOW}[tf-action] \u26a0{RESET} {msg}", flush=True)
+
+
+def err(msg: str) -> None:
+    print(f"{RED}[tf-action] \u2717{RESET} {msg}", file=sys.stderr, flush=True)
 
 # ── Working directory ─────────────────────────────────────────────────────────
 
