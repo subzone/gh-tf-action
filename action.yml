@@ -1,0 +1,171 @@
+name: 'Terraform Plan & Apply'
+description: 'Run Terraform with rich plan visualization in Step Summary, PR comments, multi-cloud backend support, and policy warnings.'
+author: 'subzone'
+
+branding:
+  icon: 'layers'
+  color: 'purple'
+
+inputs:
+  # ── Command ────────────────────────────────────────────────────────────────
+  command:
+    description: 'Terraform command: init | validate | plan | apply | plan-and-apply | destroy'
+    required: false
+    default: 'plan'
+
+  # ── Terraform version ──────────────────────────────────────────────────────
+  terraform-version:
+    description: 'Terraform version to install (e.g. 1.7.5). Uses PATH terraform if empty.'
+    required: false
+    default: '1.12.0'
+
+  # ── Working directory ──────────────────────────────────────────────────────
+  working-directory:
+    description: 'Directory containing .tf files'
+    required: false
+    default: '.'
+
+  # ── Backend ────────────────────────────────────────────────────────────────
+  backend-type:
+    description: 'Backend type: local | azurerm | s3 | gcs | custom'
+    required: false
+    default: 'local'
+
+  backend-config-file:
+    description: 'Path to HCL or key=value backend config file (custom backend only)'
+    required: false
+    default: ''
+
+  # azurerm backend
+  azure-resource-group:
+    description: 'Azure resource group (azurerm backend)'
+    required: false
+    default: ''
+  azure-storage-account:
+    description: 'Azure storage account name (azurerm backend)'
+    required: false
+    default: ''
+  azure-container:
+    description: 'Azure blob container (azurerm backend)'
+    required: false
+    default: ''
+  azure-state-key:
+    description: 'State blob key (azurerm backend)'
+    required: false
+    default: ''
+
+  # s3 backend
+  aws-bucket:
+    description: 'S3 bucket name (s3 backend)'
+    required: false
+    default: ''
+  aws-key:
+    description: 'S3 state key path (s3 backend)'
+    required: false
+    default: ''
+  aws-region:
+    description: 'AWS region (s3 backend)'
+    required: false
+    default: ''
+  aws-dynamodb-table:
+    description: 'DynamoDB lock table (s3 backend, optional)'
+    required: false
+    default: ''
+
+  # gcs backend
+  gcp-bucket:
+    description: 'GCS bucket name (gcs backend)'
+    required: false
+    default: ''
+  gcp-prefix:
+    description: 'GCS state prefix (gcs backend, optional)'
+    required: false
+    default: ''
+
+  # ── Plan ───────────────────────────────────────────────────────────────────
+  plan-file:
+    description: 'Binary plan file name'
+    required: false
+    default: 'tfplan'
+
+  additional-args:
+    description: 'Extra arguments appended to the terraform command line'
+    required: false
+    default: ''
+
+  auto-approve:
+    description: 'Pass -auto-approve to apply/destroy (set true to skip confirmation)'
+    required: false
+    default: 'false'
+
+  # ── Visualization & Reporting ──────────────────────────────────────────────
+  post-step-summary:
+    description: 'Write rich plan visualization to GitHub Step Summary'
+    required: false
+    default: 'true'
+
+  post-pr-comment:
+    description: 'Post plan summary as a PR comment (updates existing comment)'
+    required: false
+    default: 'true'
+
+  upload-plan-artifact:
+    description: 'Upload plan.json as a workflow artifact'
+    required: false
+    default: 'true'
+
+  artifact-name:
+    description: 'Name of the uploaded plan artifact'
+    required: false
+    default: 'terraform-plan'
+
+  # ── Auth ───────────────────────────────────────────────────────────────────
+  github-token:
+    description: 'GitHub token for PR comments and artifact upload'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  add-count:
+    description: 'Number of resources to add'
+  change-count:
+    description: 'Number of resources to change'
+  destroy-count:
+    description: 'Number of resources to destroy'
+  replace-count:
+    description: 'Number of resources to replace'
+  has-changes:
+    description: 'true if the plan has any resource changes'
+  plan-json-path:
+    description: 'Absolute path to the generated plan.json file'
+  exit-code:
+    description: 'Terraform exit code (0 = success, 2 = changes present when using -detailed-exitcode)'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    INPUT_COMMAND:               ${{ inputs.command }}
+    INPUT_TERRAFORM_VERSION:     ${{ inputs.terraform-version }}
+    INPUT_WORKING_DIRECTORY:     ${{ inputs.working-directory }}
+    INPUT_BACKEND_TYPE:          ${{ inputs.backend-type }}
+    INPUT_BACKEND_CONFIG_FILE:   ${{ inputs.backend-config-file }}
+    INPUT_AZURE_RESOURCE_GROUP:  ${{ inputs.azure-resource-group }}
+    INPUT_AZURE_STORAGE_ACCOUNT: ${{ inputs.azure-storage-account }}
+    INPUT_AZURE_CONTAINER:       ${{ inputs.azure-container }}
+    INPUT_AZURE_STATE_KEY:       ${{ inputs.azure-state-key }}
+    INPUT_AWS_BUCKET:            ${{ inputs.aws-bucket }}
+    INPUT_AWS_KEY:               ${{ inputs.aws-key }}
+    INPUT_AWS_REGION:            ${{ inputs.aws-region }}
+    INPUT_AWS_DYNAMODB_TABLE:    ${{ inputs.aws-dynamodb-table }}
+    INPUT_GCP_BUCKET:            ${{ inputs.gcp-bucket }}
+    INPUT_GCP_PREFIX:            ${{ inputs.gcp-prefix }}
+    INPUT_PLAN_FILE:             ${{ inputs.plan-file }}
+    INPUT_ADDITIONAL_ARGS:       ${{ inputs.additional-args }}
+    INPUT_AUTO_APPROVE:          ${{ inputs.auto-approve }}
+    INPUT_POST_STEP_SUMMARY:     ${{ inputs.post-step-summary }}
+    INPUT_POST_PR_COMMENT:       ${{ inputs.post-pr-comment }}
+    INPUT_UPLOAD_PLAN_ARTIFACT:  ${{ inputs.upload-plan-artifact }}
+    INPUT_ARTIFACT_NAME:         ${{ inputs.artifact-name }}
+    INPUT_GITHUB_TOKEN:          ${{ inputs.github-token }}
+    GITHUB_TOKEN:                ${{ inputs.github-token }}
