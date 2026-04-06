@@ -98,6 +98,16 @@ inputs:
     required: false
     default: 'false'
 
+  # ── Visualization-only mode ────────────────────────────────────────────────
+  plan-json-path:
+    description: |
+      Path to an existing plan.json file. When set, the command is forced to
+      "visualize" — skips all terraform execution and renders the Step Summary,
+      PR comment, and outputs directly from this file. Useful for separating
+      plan and visualization jobs, or for testing with fixture files.
+    required: false
+    default: ''
+
   # ── Visualization & Reporting ──────────────────────────────────────────────
   post-step-summary:
     description: 'Write rich plan visualization to GitHub Step Summary'
@@ -146,6 +156,7 @@ runs:
   image: 'Dockerfile'
   env:
     INPUT_COMMAND:               ${{ inputs.command }}
+    INPUT_PLAN_JSON_PATH:        ${{ inputs.plan-json-path }}
     INPUT_TERRAFORM_VERSION:     ${{ inputs.terraform-version }}
     INPUT_WORKING_DIRECTORY:     ${{ inputs.working-directory }}
     INPUT_BACKEND_TYPE:          ${{ inputs.backend-type }}

@@ -1,0 +1,472 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.12.0",
+  "variables": {
+    "environment":   { "value": "production" },
+    "location":      { "value": "westeurope" },
+    "resource_prefix": { "value": "prod" }
+  },
+  "resource_changes": [
+    {
+      "address":       "azurerm_resource_group.main",
+      "type":          "azurerm_resource_group",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":     "prod-rg",
+          "location": "West Europe",
+          "tags":     { "Environment": "production", "ManagedBy": "Terraform" }
+        },
+        "after_unknown": { "id": true }
+      }
+    },
+    {
+      "address":       "azurerm_virtual_network.main",
+      "type":          "azurerm_virtual_network",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                "prod-vnet",
+          "location":            "West Europe",
+          "address_space":       ["10.0.0.0/16"],
+          "dns_servers":         [],
+          "tags":                { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "guid": true, "subnet": true }
+      }
+    },
+    {
+      "address":       "azurerm_subnet.web",
+      "type":          "azurerm_subnet",
+      "name":          "web",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":             "prod-web-subnet",
+          "address_prefixes": ["10.0.1.0/24"]
+        },
+        "after_unknown": { "id": true, "virtual_network_name": true, "resource_group_name": true }
+      }
+    },
+    {
+      "address":       "azurerm_subnet.data",
+      "type":          "azurerm_subnet",
+      "name":          "data",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":             "prod-data-subnet",
+          "address_prefixes": ["10.0.10.0/24"]
+        },
+        "after_unknown": { "id": true, "virtual_network_name": true, "resource_group_name": true }
+      }
+    },
+    {
+      "address":       "azurerm_network_security_group.web",
+      "type":          "azurerm_network_security_group",
+      "name":          "web",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":              "prod-web-nsg",
+          "location":          "West Europe",
+          "security_rule": [
+            {
+              "name":                       "Allow-HTTP",
+              "priority":                   100,
+              "direction":                  "Inbound",
+              "access":                     "Allow",
+              "protocol":                   "Tcp",
+              "source_port_range":          "*",
+              "destination_port_range":     "80",
+              "source_address_prefix":      "*",
+              "destination_address_prefix": "*"
+            },
+            {
+              "name":                       "Allow-HTTPS",
+              "priority":                   110,
+              "direction":                  "Inbound",
+              "access":                     "Allow",
+              "protocol":                   "Tcp",
+              "source_port_range":          "*",
+              "destination_port_range":     "443",
+              "source_address_prefix":      "*",
+              "destination_address_prefix": "*"
+            }
+          ],
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true }
+      }
+    },
+    {
+      "address":       "azurerm_storage_account.assets",
+      "type":          "azurerm_storage_account",
+      "name":          "assets",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                      "prodassets20240101",
+          "location":                  "West Europe",
+          "account_tier":              "Standard",
+          "account_replication_type":  "LRS",
+          "allow_blob_public_access":  true,
+          "enable_https_traffic_only": false,
+          "min_tls_version":           "TLS1_0",
+          "tags": { "Purpose": "static-assets" }
+        },
+        "after_unknown": { "id": true, "primary_blob_endpoint": true }
+      }
+    },
+    {
+      "address":       "azurerm_storage_account.logs",
+      "type":          "azurerm_storage_account",
+      "name":          "logs",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                      "prodlogs20240101",
+          "location":                  "West Europe",
+          "account_tier":              "Standard",
+          "account_replication_type":  "GRS",
+          "allow_blob_public_access":  false,
+          "enable_https_traffic_only": true,
+          "min_tls_version":           "TLS1_2",
+          "tags": { "Purpose": "audit-logs" }
+        },
+        "after_unknown": { "id": true, "primary_blob_endpoint": true }
+      }
+    },
+    {
+      "address":       "azurerm_app_service_plan.main",
+      "type":          "azurerm_app_service_plan",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":     "prod-asp",
+          "location": "West Europe",
+          "kind":     "Linux",
+          "reserved": true,
+          "sku": { "tier": "Standard", "size": "S2" },
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "maximum_number_of_workers": true }
+      }
+    },
+    {
+      "address":       "azurerm_app_service.api",
+      "type":          "azurerm_app_service",
+      "name":          "api",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":     "prod-api",
+          "location": "West Europe",
+          "app_settings": {
+            "WEBSITE_RUN_FROM_PACKAGE": "1",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "(known after apply)"
+          },
+          "site_config": {
+            "linux_fx_version": "NODE|18-lts",
+            "always_on":        true
+          },
+          "https_only": false,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "default_site_hostname": true }
+      }
+    },
+    {
+      "address":       "azurerm_postgresql_server.main",
+      "type":          "azurerm_postgresql_server",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                          "prod-postgres",
+          "location":                      "West Europe",
+          "sku_name":                      "GP_Gen5_4",
+          "storage_mb":                    51200,
+          "backup_retention_days":         7,
+          "geo_redundant_backup_enabled":  false,
+          "auto_grow_enabled":             true,
+          "administrator_login":           "psqladmin",
+          "version":                       "11",
+          "ssl_enforcement_enabled":       false,
+          "public_network_access_enabled": true,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "fqdn": true }
+      }
+    },
+    {
+      "address":       "azurerm_redis_cache.main",
+      "type":          "azurerm_redis_cache",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                    "prod-redis",
+          "location":                "West Europe",
+          "capacity":                1,
+          "family":                  "C",
+          "sku_name":                "Standard",
+          "enable_non_ssl_port":     false,
+          "minimum_tls_version":     "1.2",
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "hostname": true, "ssl_port": true }
+      }
+    },
+    {
+      "address":       "azurerm_key_vault.main",
+      "type":          "azurerm_key_vault",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":                        "prod-kv-20240101",
+          "location":                    "West Europe",
+          "sku_name":                    "standard",
+          "soft_delete_retention_days":  90,
+          "purge_protection_enabled":    true,
+          "enabled_for_disk_encryption": true,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "vault_uri": true }
+      }
+    },
+    {
+      "address":       "azurerm_application_insights.main",
+      "type":          "azurerm_application_insights",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":             "prod-appinsights",
+          "location":         "West Europe",
+          "application_type": "web",
+          "retention_in_days": 90,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "instrumentation_key": true, "connection_string": true }
+      }
+    },
+    {
+      "address":       "azurerm_log_analytics_workspace.main",
+      "type":          "azurerm_log_analytics_workspace",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":              "prod-law",
+          "location":          "West Europe",
+          "sku":               "PerGB2018",
+          "retention_in_days": 30,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "workspace_id": true, "primary_shared_key": true }
+      }
+    },
+    {
+      "address":       "azurerm_cdn_profile.main",
+      "type":          "azurerm_cdn_profile",
+      "name":          "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":     "prod-cdn",
+          "location": "global",
+          "sku":      "Standard_Microsoft",
+          "tags":     { "Environment": "production" }
+        },
+        "after_unknown": { "id": true }
+      }
+    },
+    {
+      "address":       "azurerm_cdn_endpoint.assets",
+      "type":          "azurerm_cdn_endpoint",
+      "name":          "assets",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name":     "prod-cdn-assets",
+          "location": "global",
+          "is_https_allowed": true,
+          "is_http_allowed":  true,
+          "tags": { "Environment": "production" }
+        },
+        "after_unknown": { "id": true, "host_name": true, "profile_name": true }
+      }
+    }
+  ],
+  "configuration": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "azurerm_virtual_network.main",
+          "type": "azurerm_virtual_network",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_subnet.web",
+          "type": "azurerm_subnet",
+          "expressions": {
+            "virtual_network_name": { "references": ["azurerm_virtual_network.main"] },
+            "resource_group_name":  { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_subnet.data",
+          "type": "azurerm_subnet",
+          "expressions": {
+            "virtual_network_name": { "references": ["azurerm_virtual_network.main"] },
+            "resource_group_name":  { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_network_security_group.web",
+          "type": "azurerm_network_security_group",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_storage_account.assets",
+          "type": "azurerm_storage_account",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_storage_account.logs",
+          "type": "azurerm_storage_account",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_app_service_plan.main",
+          "type": "azurerm_app_service_plan",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_app_service.api",
+          "type": "azurerm_app_service",
+          "expressions": {
+            "resource_group_name":    { "references": ["azurerm_resource_group.main"] },
+            "location":               { "references": ["azurerm_resource_group.main"] },
+            "app_service_plan_id":    { "references": ["azurerm_app_service_plan.main"] },
+            "app_settings": {
+              "APPINSIGHTS_INSTRUMENTATIONKEY": { "references": ["azurerm_application_insights.main"] }
+            }
+          }
+        },
+        {
+          "address": "azurerm_postgresql_server.main",
+          "type": "azurerm_postgresql_server",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_redis_cache.main",
+          "type": "azurerm_redis_cache",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] },
+            "subnet_id":           { "references": ["azurerm_subnet.data"] }
+          }
+        },
+        {
+          "address": "azurerm_key_vault.main",
+          "type": "azurerm_key_vault",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_application_insights.main",
+          "type": "azurerm_application_insights",
+          "expressions": {
+            "resource_group_name":        { "references": ["azurerm_resource_group.main"] },
+            "location":                   { "references": ["azurerm_resource_group.main"] },
+            "workspace_id":               { "references": ["azurerm_log_analytics_workspace.main"] }
+          }
+        },
+        {
+          "address": "azurerm_log_analytics_workspace.main",
+          "type": "azurerm_log_analytics_workspace",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "location":            { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_cdn_profile.main",
+          "type": "azurerm_cdn_profile",
+          "expressions": {
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] }
+          }
+        },
+        {
+          "address": "azurerm_cdn_endpoint.assets",
+          "type": "azurerm_cdn_endpoint",
+          "expressions": {
+            "profile_name":        { "references": ["azurerm_cdn_profile.main"] },
+            "resource_group_name": { "references": ["azurerm_resource_group.main"] },
+            "origin": {
+              "host_name": { "references": ["azurerm_storage_account.assets"] }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

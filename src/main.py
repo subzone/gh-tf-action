@@ -28,7 +28,8 @@ def _bool(name: str, default: bool = False) -> bool:
         return default
     return v in ("true", "1", "yes")
 
-COMMAND         = _inp("command", "plan")
+PLAN_JSON_PATH  = _inp("plan_json_path")
+COMMAND         = "visualize" if PLAN_JSON_PATH else _inp("command", "plan")
 WORKING_DIR     = _inp("working_directory", ".")
 BACKEND_TYPE    = _inp("backend_type", "local")
 PLAN_FILE       = _inp("plan_file", "tfplan") or "tfplan"
@@ -825,8 +826,18 @@ def main() -> None:
             cmd_init(cwd, [])
             cmd_destroy(cwd, extra)
 
+        elif COMMAND == "visualize":
+            p = Path(PLAN_JSON_PATH)
+            if not p.is_absolute():
+                p = (Path(GITHUB_WORKSPACE) / p).resolve()
+            if not p.exists():
+                raise SystemExit(f"plan-json-path not found: {p}")
+            json_path = p
+            plan = json.loads(p.read_text())
+            log(f"Visualization-only mode — loaded {p}")
+
         else:
-            raise SystemExit(f"Unknown command: '{COMMAND}'. Valid: init | validate | plan | apply | plan-and-apply | destroy")
+            raise SystemExit(f"Unknown command: '{COMMAND}'. Valid: init | validate | plan | apply | plan-and-apply | destroy | visualize")
 
     except SystemExit as e:
         err(str(e))

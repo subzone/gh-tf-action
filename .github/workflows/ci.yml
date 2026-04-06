@@ -90,3 +90,43 @@ jobs:
           post-step-summary: true
           post-pr-comment:   false
           upload-plan-artifact: false
+
+  # ── Visualization — AWS fixture (policy checks + Mermaid graph) ───────────────
+  test-visualize-aws:
+    name: Test — visualize AWS plan (fixture)
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Visualize AWS plan
+        uses: ./
+        with:
+          plan-json-path:    fixture/aws-plan.json
+          post-step-summary: true
+          post-pr-comment:   ${{ github.event_name == 'pull_request' }}
+          upload-plan-artifact: false
+
+  # ── Visualization — Azure fixture (policy checks + Mermaid graph) ─────────────
+  test-visualize-azure:
+    name: Test — visualize Azure plan (fixture)
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Visualize Azure plan
+        uses: ./
+        with:
+          plan-json-path:    fixture/azure-plan.json
+          post-step-summary: true
+          post-pr-comment:   ${{ github.event_name == 'pull_request' }}
+          upload-plan-artifact: false
